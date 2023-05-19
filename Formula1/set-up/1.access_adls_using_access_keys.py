@@ -7,9 +7,17 @@
 
 # COMMAND ----------
 
+dbutils.secrets.help()
+
+# COMMAND ----------
+
+lukaszdrozdformula1_account_key = dbutils.secrets.get(scope ='formula1-scope', key='lukaszdrozdformula1-account-key')
+
+# COMMAND ----------
+
 spark.conf.set(
     "fs.azure.account.key.lukaszdrozdformula1.dfs.core.windows.net",
-    "<acces key from storage account>"
+    lukaszdrozdformula1_account_key
 )
 
 # COMMAND ----------

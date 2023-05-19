@@ -9,9 +9,13 @@
 
 # COMMAND ----------
 
-client_id = "bb014de5-4aa7-4de0-ab30-3c8ee2460a15"
-tenant_id = "9f265b79-9935-486e-98d2-d39c0f1692e8"
-client_secret = "fhC8Q~SORb1yNGEgSRGgxYh15lc_WRFIFoFWUaN-"
+dbutils.secrets.list(scope= 'formula1-scope')
+
+# COMMAND ----------
+
+client_id = dbutils.secrets.get(scope = 'formula1-scope', key='lukaszdrozdforumla1-app-client-id')
+tenant_id = dbutils.secrets.get(scope = 'formula1-scope', key='lukaszdrozdforumla1-app-tenant-id')
+client_secret = dbutils.secrets.get(scope = 'formula1-scope', key='lukaszdrozdforumla1-app-client-secret')
 
 # COMMAND ----------
 
@@ -29,3 +33,7 @@ display(dbutils.fs.ls("abfss://demo@lukaszdrozdformula1.dfs.core.windows.net"))
 # COMMAND ----------
 
 display(spark.read.csv("abfss://demo@lukaszdrozdformula1.dfs.core.windows.net/circuits.csv"))
+
+# COMMAND ----------
+
+

@@ -7,10 +7,18 @@
 
 # COMMAND ----------
 
+dbutils.secrets.list(scope= 'formula1-scope')
+
+# COMMAND ----------
+
+lukaszdrozdformula1_sas_key = dbutils.secrets.get(scope= 'formula1-scope', key='lukaszdrozdformula1-sas')
+
+# COMMAND ----------
+
 spark.conf.set("fs.azure.account.auth.type.lukaszdrozdformula1.dfs.core.windows.net", "SAS")
 spark.conf.set("fs.azure.sas.token.provider.type.lukaszdrozdformula1.dfs.core.windows.net", "org.apache.hadoop.fs.azurebfs.sas.FixedSASTokenProvider")
 # SAS Token expires after 8h
-spark.conf.set("fs.azure.sas.fixed.token.lukaszdrozdformula1.dfs.core.windows.net", "sp=rl&st=2023-05-19T08:22:04Z&se=2023-05-19T16:22:04Z&spr=https&sv=2022-11-02&sr=c&sig=OXVQRqzJ4uz8PFLFDRELtBcf79oeXzubdctej6w1V%2FI%3D") 
+spark.conf.set("fs.azure.sas.fixed.token.lukaszdrozdformula1.dfs.core.windows.net", lukaszdrozdformula1_sas_key) 
 
 # COMMAND ----------
 

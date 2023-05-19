@@ -1,0 +1,31 @@
+# Databricks notebook source
+# MAGIC %md
+# MAGIC ##Access Azure Data Lake using Service Principal
+# MAGIC ###Steps to follow
+# MAGIC 1. Register Azure AD Application/Service Principal
+# MAGIC 1. Generate a secret/password for the Application
+# MAGIC 1. Set Spark Config with App/Client id, Directory/Tenant id & Secret
+# MAGIC 1. Assign Role 'Storage Blob Data Contributor' to the Data Lake
+
+# COMMAND ----------
+
+client_id = "bb014de5-4aa7-4de0-ab30-3c8ee2460a15"
+tenant_id = "9f265b79-9935-486e-98d2-d39c0f1692e8"
+client_secret = "fhC8Q~SORb1yNGEgSRGgxYh15lc_WRFIFoFWUaN-"
+
+# COMMAND ----------
+
+spark.conf.set("fs.azure.account.auth.type.lukaszdrozdformula1.dfs.core.windows.net", "OAuth")
+spark.conf.set("fs.azure.account.oauth.provider.type.lukaszdrozdformula1.dfs.core.windows.net", "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider")
+spark.conf.set("fs.azure.account.oauth2.client.id.lukaszdrozdformula1.dfs.core.windows.net", client_id)
+spark.conf.set("fs.azure.account.oauth2.client.secret.lukaszdrozdformula1.dfs.core.windows.net", client_secret)
+spark.conf.set("fs.azure.account.oauth2.client.endpoint.lukaszdrozdformula1.dfs.core.windows.net", f"https://login.microsoftonline.com/{tenant_id}/oauth2/token")
+
+# COMMAND ----------
+
+# dbutils.fs.ls("abfss://<container-name>@<storage-account-name>.dfs.core.windows.net/<path-to-data>")
+display(dbutils.fs.ls("abfss://demo@lukaszdrozdformula1.dfs.core.windows.net"))
+
+# COMMAND ----------
+
+display(spark.read.csv("abfss://demo@lukaszdrozdformula1.dfs.core.windows.net/circuits.csv"))

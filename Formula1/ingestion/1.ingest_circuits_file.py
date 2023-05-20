@@ -77,4 +77,50 @@ display(circuits_selected_df)
 
 # COMMAND ----------
 
-circuits_renamed_df = circuits_selected_df.withColumnRenamed("circuitId", "circuit_id") \ 
+circuits_renamed_df = circuits_selected_df.withColumnRenamed("circuitId", "circuit_id") \
+    .withColumnRenamed("circuitRef", "circuit_ref") \
+    .withColumnRenamed("lat", "latitude") \
+    .withColumnRenamed("lng", "longitude") \
+    .withColumnRenamed("alt", "altitude") 
+
+# COMMAND ----------
+
+display(circuits_renamed_df)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ##### Step 4 - Add ingestion date to the dataframe
+
+# COMMAND ----------
+
+from pyspark.sql.functions import current_timestamp, lit
+
+# COMMAND ----------
+
+circuits_final_df = circuits_renamed_df.withColumn("ingestion_date", current_timestamp())
+
+# COMMAND ----------
+
+.withColumn("env", lit("Production")) - dodaje kolumnę ze stałą wartością
+
+# COMMAND ----------
+
+display(circuits_final_df)
+
+# COMMAND ----------
+
+# MAGIC %md 
+# MAGIC #### Step 5 - Write data to datalake as parquet 
+
+# COMMAND ----------
+
+circuits_final_df.write.mode("overwrite").parquet("/mnt/lukaszdrozdformula1/processed/circuits")
+
+# COMMAND ----------
+
+display(spark.read.parquet("/mnt/lukaszdrozdformula1/processed/circuits"))
+
+# COMMAND ----------
+
+

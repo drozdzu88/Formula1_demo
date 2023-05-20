@@ -9,15 +9,6 @@
 
 # COMMAND ----------
 
-display(dbutils.fs.mounts())
-
-# COMMAND ----------
-
-# MAGIC %fs
-# MAGIC ls /mnt/lukaszdrozdformula1/raw
-
-# COMMAND ----------
-
 from pyspark.sql.types import StructType, StructField, IntegerType, StringType, DoubleType
 
 # COMMAND ----------
@@ -52,4 +43,4 @@ circuits_df.printSchema()
 
 # COMMAND ----------
 
-circuits_df.describe().show()
+

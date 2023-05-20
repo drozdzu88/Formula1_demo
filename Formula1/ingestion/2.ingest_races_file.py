@@ -45,14 +45,14 @@ races_schema = StructType(fields = [StructField("raceId", IntegerType(), False),
                           StructField("circuitId", IntegerType(), False), \
                           StructField("name", StringType(), True), \
                           StructField("date", DateType(), True), \
-                          StructField("time", TimestampType(), True), \
+                          StructField("time", StringType(), True), \
                           StructField("url", StringType(), True)
 ])
 
 # COMMAND ----------
 
 races_df = spark.read \
-    .option("hearer", True) \
+    .option("header", True) \
     .schema(races_schema) \
     .csv('dbfs:/mnt/lukaszdrozdformula1/raw/races.csv')
 
@@ -66,30 +66,43 @@ races_df.printSchema()
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC ##### Step 2 - Add two new columns
+
+# COMMAND ----------
+
+races_with_timestamp_df = races_df.withColumn('race_timestamp', to_timestamp(concat(col("date"), lit(' '), col("time")), 'yyyy-MM-dd HH:mm:ss')) \
+                                    .withColumn('ingestion_date', current_timestamp())
+
+# COMMAND ----------
+
+display(races_with_timestamp_df)
+
+# COMMAND ----------
+
 # MAGIC %md 
-# MAGIC ### Select only the required columns 
+# MAGIC ##### Step 3 - Select only the required columns 
 
 # COMMAND ----------
 
-races_selected_df = races_df.select(col("raceId").alias("race_id"), col("year").alias("race_year"), col("round"), col("circuitId").alias("circuit_id"), col("name"), col("date"), col("time"))
+final_races_df = races_with_timestamp_df.select(col("raceId").alias("race_id"), col("year").alias("race_year"), col("round"), col("circuitId").alias("circuit_id"), col("name"), col("race_timestamp"), col("ingestion_date"))
 
 # COMMAND ----------
 
-display(races_selected_df)
+display(final_races_df)
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ##### Step 3 - Add two new columns
+# MAGIC ##### Step 4 - Write as a parquet file to Data Lake Storage
 
 # COMMAND ----------
 
-races_final_df = races_selected_df.withColumn('race_timestamp', to_timestamp(concat(col("date"), lit(' '), col("time")), 'yyyy-MM-dd HH:mm:ss')) \
-    .withColumn('ingestion_date', current_timestamp())
+final_races_df.write.mode("overwrite").parquet("/mnt/lukaszdrozdformula1/processed/races")
 
 # COMMAND ----------
 
-display(races_final_df)
+display(spark.read.option("header", True).parquet("/mnt/lukaszdrozdformula1/processed/races"))
 
 # COMMAND ----------
 

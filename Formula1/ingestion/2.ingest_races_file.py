@@ -102,7 +102,7 @@ final_races_df.write.mode("overwrite").parquet("/mnt/lukaszdrozdformula1/process
 
 # COMMAND ----------
 
-display(spark.read.option("header", True).parquet("/mnt/lukaszdrozdformula1/processed/races"))
+display(spark.read.parquet("/mnt/lukaszdrozdformula1/processed/races"))
 
 # COMMAND ----------
 

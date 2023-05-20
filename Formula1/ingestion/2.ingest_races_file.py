@@ -98,7 +98,7 @@ display(final_races_df)
 
 # COMMAND ----------
 
-final_races_df.write.mode("overwrite").parquet("/mnt/lukaszdrozdformula1/processed/races")
+final_races_df.write.mode("overwrite").partitionBy('race_year').parquet("/mnt/lukaszdrozdformula1/processed/races")
 
 # COMMAND ----------
 

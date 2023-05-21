@@ -1,6 +1,6 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC ###Ingest lapt_times.json file
+# MAGIC ###Ingest lapt_times.csv file
 
 # COMMAND ----------
 

@@ -1,6 +1,6 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC ###Ingest constructors.json file
+# MAGIC ###Ingest pit_stops.json file
 
 # COMMAND ----------
 

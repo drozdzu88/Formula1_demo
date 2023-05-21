@@ -1,10 +1,6 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC ###Ingest circuits.csv file
-
-# COMMAND ----------
-
-dbutils.widgets.help()
+# MAGIC ### Ingest circuits.csv file
 
 # COMMAND ----------
 
@@ -22,7 +18,7 @@ v_data_source = dbutils.widgets.get("p_data_source")
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ##### Step 1-  Read the CSV file using the spark dataframe reader
+# MAGIC ##### Step 1 - Read the CSV file using the spark dataframe reader
 
 # COMMAND ----------
 
@@ -38,9 +34,7 @@ circuits_schema = StructType(fields=[StructField("circuitId", IntegerType(), Fal
                                      StructField("lat", DoubleType(), True),
                                      StructField("lng", DoubleType(), True),
                                      StructField("alt", IntegerType(), True),
-                                     StructField("url", StringType(), True),
-                                     
-
+                                     StructField("url", StringType(), True)
 ])
 
 # COMMAND ----------
@@ -52,20 +46,8 @@ circuits_df = spark.read \
 
 # COMMAND ----------
 
-display(circuits_df)
-
-# COMMAND ----------
-
-circuits_df.printSchema()
-
-# COMMAND ----------
-
-# MAGIC %md 
-# MAGIC ### Select only the required columns 
-
-# COMMAND ----------
-
-circuits_selected_df = circuits_df.select("circuitId", "circuitRef", "name", "location", "country", "lat", "lng", "alt")
+# MAGIC %md
+# MAGIC ##### Step 2 - Select only the required columns
 
 # COMMAND ----------
 
@@ -73,23 +55,11 @@ from pyspark.sql.functions import col
 
 # COMMAND ----------
 
-# MAGIC %md
-# MAGIC There are another 3 different methods to select columns 
-# MAGIC - circuits_selected_df = circuits_df.select(circuits_df.circuitId, ....)
-# MAGIC - circuits_selected_df = circuits_df.select(circuits_df["circuitId"], ....)
-# MAGIC - circuits_selected_df = circuits_df.select(col("circuitId"), ....)
-
-# COMMAND ----------
-
 circuits_selected_df = circuits_df.select(col("circuitId"), col("circuitRef"), col("name"), col("location"), col("country"), col("lat"), col("lng"), col("alt"))
 
 # COMMAND ----------
 
-display(circuits_selected_df)
-
-# COMMAND ----------
-
-# MAGIC %md 
+# MAGIC %md
 # MAGIC ##### Step 3 - Rename the columns as required
 
 # COMMAND ----------
@@ -99,39 +69,25 @@ from pyspark.sql.functions import lit
 # COMMAND ----------
 
 circuits_renamed_df = circuits_selected_df.withColumnRenamed("circuitId", "circuit_id") \
-    .withColumnRenamed("circuitRef", "circuit_ref") \
-    .withColumnRenamed("lat", "latitude") \
-    .withColumnRenamed("lng", "longitude") \
-    .withColumnRenamed("alt", "altitude") \
-    .withColumn("data_source", lit(v_data_source))
-
-# COMMAND ----------
-
-display(circuits_renamed_df)
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ##### Step 4 - Add ingestion date to the dataframe
-
-# COMMAND ----------
-
-#circuits_final_df = circuits_renamed_df.withColumn("ingestion_date", current_timestamp())
-circuits_final_df = add_ingestion_date(circuits_renamed_df)
-
-# COMMAND ----------
-
-# from pyspark.sql.functions import lit
-#.withColumn("env", lit("Production")) - dodaje kolumnę ze stałą wartością
-
-# COMMAND ----------
-
-display(circuits_final_df)
+.withColumnRenamed("circuitRef", "circuit_ref") \
+.withColumnRenamed("lat", "latitude") \
+.withColumnRenamed("lng", "longitude") \
+.withColumnRenamed("alt", "altitude") \
+.withColumn("data_source", lit(v_data_source))
 
 # COMMAND ----------
 
 # MAGIC %md 
-# MAGIC #### Step 5 - Write data to datalake as parquet 
+# MAGIC ##### Step 4 - Add ingestion date to the dataframe
+
+# COMMAND ----------
+
+circuits_final_df = add_ingestion_date(circuits_renamed_df)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ##### Step 5 - Write data to datalake as parquet
 
 # COMMAND ----------
 
@@ -143,4 +99,4 @@ display(spark.read.parquet(f"{processed_folder_path}/circuits"))
 
 # COMMAND ----------
 
-
+dbutils.notebook.exit("Success")

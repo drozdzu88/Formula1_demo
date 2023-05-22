@@ -20,13 +20,8 @@
 # COMMAND ----------
 
 results_df = spark.read.parquet(f"{processed_folder_path}/results") \
-                        .withColumnRenamed("fastest_lap_time", "fastest lap") \
                         .withColumnRenamed("time", "race_time")
 
-
-# COMMAND ----------
-
-display(results_df)
 
 # COMMAND ----------
 
@@ -37,17 +32,9 @@ races_df = spark.read.parquet(f"{processed_folder_path}/races") \
 
 # COMMAND ----------
 
-display(races_df)
-
-# COMMAND ----------
-
 circuits_df = spark.read.parquet(f"{processed_folder_path}/circuits") \
                         .withColumnRenamed("location", "circuit_location")
 
-
-# COMMAND ----------
-
-display(circuits_df)
 
 # COMMAND ----------
 
@@ -59,55 +46,39 @@ drivers_df = spark.read.parquet(f"{processed_folder_path}/drivers") \
 
 # COMMAND ----------
 
-display(drivers_df)
-
-# COMMAND ----------
-
 constructors_df = spark.read.parquet(f"{processed_folder_path}/constructors") \
                         .withColumnRenamed("name", "team")
                             
 
 # COMMAND ----------
 
-display(constructors_df)
+# MAGIC %md 
+# MAGIC #####Joins
 
 # COMMAND ----------
 
-races_filtered_df = races_df.filter((races_df.race_year == 2020) & (races_df.race_name == "Abu Dhabi Grand Prix"))
+race_circuits_join_df = races_df.join(circuits_df, races_df.circuit_id == circuits_df.circuit_id, "inner")
 
 # COMMAND ----------
 
-display(races_filtered_df)
-
-# COMMAND ----------
-
-circuits_filtered_df = circuits_df.filter(circuits_df.circuit_id == 24)
-
-# COMMAND ----------
-
-display(circuits_filtered_df)
-
-# COMMAND ----------
-
-race_results_df = results_df.join(races_filtered_df, results_df.race_id == races_filtered_df.race_id, "inner") \
-                            .join(circuits_filtered_df, races_filtered_df.circuit_id == circuits_filtered_df.circuit_id, "inner") \
+race_results_df = results_df.join(race_circuits_join_df, results_df.race_id == race_circuits_join_df.race_id, "inner") \
                             .join(drivers_df, results_df.driver_id == drivers_df.driver_id, "inner") \
-                            .join(constructors_df, results_df.constructor_id == constructors_df.constructor_id, "inner") \
-                            .select(races_filtered_df.race_year, races_filtered_df.race_name, races_filtered_df.race_date, circuits_filtered_df.circuit_location, drivers_df.driver_name, \
-                                drivers_df.driver_number, drivers_df.driver_nationality, constructors_df.team, results_df.grid, results_df.["fastest lap"], results_df.race_time, results_df.points) \
+                            .join(constructors_df, results_df.constructor_id == constructors_df.constructor_id, "inner")
                             
 
 # COMMAND ----------
 
-display(race_results_df)
+from pyspark.sql.functions import current_timestamp
 
 # COMMAND ----------
 
-race_results_final_df = add_ingestion_date(race_results_df)
+final_df = race_results_df.select("race_year", "race_name", "race_date", "circuit_location", "driver_name", "driver_number", "driver_nationality",
+                                  "team", "grid", "fastest_lap", "race_time", "points", "position") \
+                        .withColumn("created_date", current_timestamp())
 
 # COMMAND ----------
 
-display(race_results_final_df)
+display(final_df.filter("race_year = 2020 and race_name = 'Abu Dhabi Grand Prix'").orderBy(final_df.points.desc()))
 
 # COMMAND ----------
 
@@ -116,7 +87,7 @@ display(race_results_final_df)
 
 # COMMAND ----------
 
-race_results_final_df.write.mode("overwrite").parquet(f"{presentation_folder_path}/race_results")
+final_df.write.mode("overwrite").parquet(f"{presentation_folder_path}/race_results")
 
 # COMMAND ----------
 
